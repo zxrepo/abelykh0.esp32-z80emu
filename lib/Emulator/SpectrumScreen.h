@@ -10,13 +10,15 @@ namespace Display
 class SpectrumScreen: public Screen
 {
 protected:
-	uint8_t* GetPixelPointer(uint16_t line) override;
-	uint8_t* GetPixelPointer(uint16_t line, uint8_t character) override;
+	uint8_t* IRAM_ATTR GetPixelPointer(uint16_t line) override;
+	uint8_t* IRAM_ATTR GetPixelPointer(uint16_t line, uint8_t character) override;
 
 public:
 	SpectrumScreen(VideoSettings settings, uint16_t startLine, uint16_t height);
 
 	void ShowScreenshot(const uint8_t* screenshot);
+
+    void Initialize(VideoController* videoController) override;
 };
 
 }

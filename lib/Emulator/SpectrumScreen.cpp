@@ -5,12 +5,7 @@
 namespace Display
 {
 
-SpectrumScreen::SpectrumScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
-	: Screen(settings, startLine, height)
-{
-}
-
-uint8_t* SpectrumScreen::GetPixelPointer(uint16_t line)
+uint8_t* IRAM_ATTR GetPixelPointerStatic2(VideoSettings* settings, uint16_t line)
 {
 	// ZX Sinclair addressing
 	// 00-00-00-Y7-Y6-Y2-Y1-Y0 Y5-Y4-Y3-x4-x3-x2-x1-x0
@@ -19,10 +14,25 @@ uint8_t* SpectrumScreen::GetPixelPointer(uint16_t line)
 	uint32_t y012 = ((line & 0B00000111) << 8);
 	uint32_t y345 = ((line & 0B00111000) << 2);
 	uint32_t y67 = ((line & 0B11000000) << 5);
-	return &this->Settings.Pixels[y012 | y345 | y67];
+	return &settings->Pixels[y012 | y345 | y67];
 }
 
-uint8_t* SpectrumScreen::GetPixelPointer(uint16_t line, uint8_t character)
+void SpectrumScreen::Initialize(VideoController* videoController)
+{
+    this->getPixelPointer = GetPixelPointerStatic2;
+}
+
+SpectrumScreen::SpectrumScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
+	: Screen(settings, startLine, height)
+{
+}
+
+uint8_t* IRAM_ATTR SpectrumScreen::GetPixelPointer(uint16_t line)
+{
+    return GetPixelPointerStatic2(&this->Settings, line);
+}
+
+uint8_t* IRAM_ATTR SpectrumScreen::GetPixelPointer(uint16_t line, uint8_t character)
 {
 	character &= 0B00011111;
 	return this->GetPixelPointer(line) + character;

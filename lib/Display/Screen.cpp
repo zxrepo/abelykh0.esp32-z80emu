@@ -1,8 +1,15 @@
 #include <string.h>
+#include "stdint.h"
 #include "Screen.h"
+#include "VideoSettings.h"
 
 namespace Display
 {
+
+uint8_t* IRAM_ATTR GetPixelPointerStatic1(VideoSettings* settings, uint16_t line)
+{
+    return &settings->Pixels[line * settings->TextColumns];
+}
 
 Screen::Screen(VideoSettings settings, uint16_t startLine, uint16_t height)
 	: Band(startLine, height)
@@ -12,21 +19,23 @@ Screen::Screen(VideoSettings settings, uint16_t startLine, uint16_t height)
 
 	this->_hResolutionNoBorder = this->Settings.TextColumns * 8;
 
-    this->_verticalBorder = (this->Height - this->Settings.TextRows * 8) / 2;
+    this->VerticalBorder = (this->Height - this->Settings.TextRows * 8) / 2;
 
 	this->_attributeCount = this->Settings.TextColumns * this->Settings.TextRows;
 	this->_pixelCount = this->_attributeCount * 8;
 
 	// Set in Initialize()
-	this->_hResolution = 0;
-	this->_horizontalBorder = 0;
+	this->HorizontalResolution = 0;
+	this->HorizontalBorder = 0;
 }
 
 void Screen::Initialize(VideoController* videoController)
 {
 	Band::Initialize(videoController);
-	this->_hResolution = videoController->getScreenWidth();
-	this->_horizontalBorder = (this->_hResolution - this->_hResolutionNoBorder) / 2;
+	this->HorizontalResolution = videoController->getScreenWidth();
+	this->HorizontalBorder = (this->HorizontalResolution - this->_hResolutionNoBorder) / 2;
+    this->getPixelPointer = GetPixelPointerStatic1;
+    this->Frames = (uint32_t*)&this->_frames;
 }
 
 void Screen::Clear()
@@ -41,7 +50,7 @@ void Screen::Clear()
 
 uint8_t* IRAM_ATTR Screen::GetPixelPointer(uint16_t line)
 {
-    return &this->Settings.Pixels[line * this->Settings.TextColumns];
+    return GetPixelPointerStatic1(&this->Settings, line);
 }
 
 uint8_t* IRAM_ATTR Screen::GetPixelPointer(uint16_t line, uint8_t character)
@@ -137,78 +146,6 @@ void Screen::PrintAlignCenter(uint8_t y, const char *str)
 {
     uint8_t leftX = (this->Settings.TextColumns - strlen(str)) / 2;
     this->PrintAt(leftX, y, str);
-}
-
-void IRAM_ATTR Screen::drawScanline(uint8_t* dest, int scanLine)
-{
-	if (this->Controller == nullptr)
-	{
-		// Not initialized yet
-		return;
-	}
-
-    unsigned scaledLine = (scanLine - this->StartLine);
-    if (scaledLine == 0)
-    {
-    	this->_frames++;
-    }
-
-    uint8_t borderColor = *this->Settings.BorderColor;
-   
-    borderColor = this->Controller->createRawPixel(borderColor);
-
-    if (scaledLine < this->_verticalBorder
-    	|| scaledLine >= (unsigned)(this->Height - this->_verticalBorder))
-    {
-        for (int x = 0; x < this->_hResolution; x++)
-        {
-            dest[x] = borderColor;
-        }
-    }
-    else
-    {
-        // Border to the left
-        for (int column = 0; column < this->_horizontalBorder; column++)
-        {
-            VGA_PIXELINROW(dest, column) = borderColor;
-        }
-
-        // Screen pixels
-        uint16_t vline = scaledLine - this->_verticalBorder;
-        uint8_t* bitmap = (uint8_t*)this->GetPixelPointer(vline);
-        uint16_t* colors = (uint16_t*)&this->Settings.Attributes[vline / 8 * this->Settings.TextColumns];
-        int column = this->_horizontalBorder;
-		for (uint8_t* charBits = bitmap; charBits < bitmap + this->Settings.TextColumns; charBits++)
-		{
-			uint8_t colorValue;
-			uint8_t pixels = *charBits;
-			uint8_t foregroundColor = this->Controller->createRawPixel(((uint8_t*)colors)[1]);
-			uint8_t backgroundColor = this->Controller->createRawPixel(((uint8_t*)colors)[0]);
-			for (int bit = 0; bit < 8; bit++)
-			{
-				if ((pixels & 0x80) != 0)
-				{
-					colorValue = foregroundColor;
-				}
-				else
-				{
-					colorValue = backgroundColor;
-				}
-
-				VGA_PIXELINROW(dest, column) = colorValue;
-				column++;
-
-				pixels <<= 1;
-			}
-			colors++;
-		}
-
-        // Border to the right
-        for (int column = this->_hResolution - this->_horizontalBorder; column < this->_horizontalBorder; column++)
-        {
-            VGA_PIXELINROW(dest, column) = borderColor;
-        }
-    }
 }
 
 void Screen::PrintChar(char c, uint16_t color)
