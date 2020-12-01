@@ -18,7 +18,7 @@ public:
 
 	void ShowScreenshot(const uint8_t* screenshot);
 
-    void Initialize(VideoController* videoController) override;
+    virtual void Initialize(VideoController* videoController) override;
 };
 
 }

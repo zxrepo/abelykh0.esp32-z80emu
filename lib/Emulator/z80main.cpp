@@ -121,11 +121,11 @@ int32_t zx_loop()
         Z80Interrupt(&_zxCpu, 0xff, &_zxContext);
 
         // delay
-        while (_spectrumScreen->_frames < _ticks)
+        while (_spectrumScreen->Frames < _ticks)
         {
         }
 
-		_ticks = _spectrumScreen->_frames + 1;
+		_ticks = _spectrumScreen->Frames + 1;
     }
 
     return result;

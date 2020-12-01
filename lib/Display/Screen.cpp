@@ -35,7 +35,6 @@ void Screen::Initialize(VideoController* videoController)
 	this->HorizontalResolution = videoController->getScreenWidth();
 	this->HorizontalBorder = (this->HorizontalResolution - this->_hResolutionNoBorder) / 2;
     this->getPixelPointer = GetPixelPointerStatic1;
-    this->Frames = (uint32_t*)&this->_frames;
 }
 
 void Screen::Clear()

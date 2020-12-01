@@ -39,7 +39,6 @@ public:
     uint8_t _cursor_y = 0;
     uint16_t _pixelCount;
     uint16_t _attributeCount;
-    volatile uint32_t _frames = 0;
 
 	Screen(VideoSettings* settings, uint16_t startLine, uint16_t height);
 
@@ -55,7 +54,7 @@ public:
 	void PrintAlignRight(uint8_t y, const char *str);
 	void PrintAlignCenter(uint8_t y, const char *str);
 
-    virtual void Initialize(VideoController* videoController);
+    virtual void Initialize(VideoController* videoController) override;
 
 	virtual ~Screen() = default;
 };

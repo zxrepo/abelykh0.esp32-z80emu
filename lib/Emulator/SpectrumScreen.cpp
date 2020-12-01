@@ -19,6 +19,7 @@ uint8_t* IRAM_ATTR GetPixelPointerStatic2(VideoSettings* settings, uint16_t line
 
 void SpectrumScreen::Initialize(VideoController* videoController)
 {
+    Screen::Initialize(videoController);
     this->getPixelPointer = GetPixelPointerStatic2;
 }
 

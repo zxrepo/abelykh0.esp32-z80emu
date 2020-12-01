@@ -20,11 +20,10 @@ void IRAM_ATTR drawScanline(void* arg, uint8_t* dest, int scanLine)
     unsigned scaledLine = (scanLine - band->StartLine);
     if (scaledLine == 0)
     {
-    	*(band->Frames)++;
+    	band->Frames++;
     }
 
     uint8_t borderColor = *band->Settings->BorderColor;
-   
     borderColor = controller->createRawPixel(borderColor);
 
     if (scaledLine < band->VerticalBorder

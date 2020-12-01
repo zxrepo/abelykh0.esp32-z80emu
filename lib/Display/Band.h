@@ -19,7 +19,7 @@ public:
     uint16_t HorizontalBorder;
     VideoSettings* Settings;
 
-    volatile uint32_t* Frames;
+    volatile uint32_t Frames = 0;
     uint8_t* (*getPixelPointer)(VideoSettings* settings, uint16_t line);
 
     Band(uint16_t startLine, uint16_t height);
