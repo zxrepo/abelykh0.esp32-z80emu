@@ -6,6 +6,7 @@ namespace Display
 
 void IRAM_ATTR drawScanline(void* arg, uint8_t* dest, int scanLine)
 {
+
     auto controller = static_cast<VideoController*>(arg);
 
     auto band = controller->GetBand(scanLine);

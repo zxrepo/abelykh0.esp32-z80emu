@@ -22,14 +22,14 @@ void SpectrumScreen::Initialize(VideoController* videoController)
     this->getPixelPointer = GetPixelPointerStatic2;
 }
 
-SpectrumScreen::SpectrumScreen(VideoSettings settings, uint16_t startLine, uint16_t height)
+SpectrumScreen::SpectrumScreen(VideoSettings* settings, uint16_t startLine, uint16_t height)
 	: Screen(settings, startLine, height)
 {
 }
 
 uint8_t* IRAM_ATTR SpectrumScreen::GetPixelPointer(uint16_t line)
 {
-    return GetPixelPointerStatic2(&this->Settings, line);
+    return GetPixelPointerStatic2(this->Settings, line);
 }
 
 uint8_t* IRAM_ATTR SpectrumScreen::GetPixelPointer(uint16_t line, uint8_t character)
@@ -40,10 +40,10 @@ uint8_t* IRAM_ATTR SpectrumScreen::GetPixelPointer(uint16_t line, uint8_t charac
 
 void SpectrumScreen::ShowScreenshot(const uint8_t* screenshot)
 {
-	memcpy(this->Settings.Pixels, screenshot, this->_pixelCount);
+	memcpy(this->Settings->Pixels, screenshot, this->_pixelCount);
 	for (uint32_t i = 0; i < this->_attributeCount; i++)
 	{
-		this->Settings.Attributes[i] = ZxSpectrumMemory::FromSpectrumColor(
+		this->Settings->Attributes[i] = ZxSpectrumMemory::FromSpectrumColor(
 				screenshot[this->_pixelCount + i]);
 	}
 }
